@@ -36,6 +36,8 @@ defmodule Geo.WKT.Encoder do
   Takes a Geometry and returns a WKT string
   """
   @spec encode!(Geo.geometry()) :: binary
+  def encode!(%FeatureCollection{} = geom), do: do_encode(geom)
+
   def encode!(geom) do
     get_srid_binary(geom.srid) <> do_encode(geom)
   end
