@@ -14,6 +14,8 @@ defmodule Geo.JSON.Encoder do
     MultiLineStringZ,
     MultiPolygon,
     MultiPolygonZ,
+    Feature,
+    FeatureCollection,
     GeometryCollection
   }
 
@@ -41,6 +43,16 @@ defmodule Geo.JSON.Encoder do
         %{"type" => "GeometryCollection", "geometries" => Enum.map(geometries, &encode!(&1))}
         |> add_crs(srid)
         |> add_properties(properties)
+
+      %FeatureCollection{features: features} ->
+        %{"type" => "FeatureCollection", "features" => Enum.map(features, &encode!(&1))}
+
+      %Feature{id: id} ->
+        geom
+        |> do_encode()
+        |> add_crs(geom.srid)
+        |> add_id(id)
+        |> add_properties(geom.properties)
 
       _ ->
         geom
@@ -151,19 +163,25 @@ defmodule Geo.JSON.Encoder do
     %{"type" => "MultiPolygon", "coordinates" => coordinates}
   end
 
+  defp do_encode(%Feature{geometry: geometry}) do
+    %{"type" => "Feature", "geometry" => encode!(geometry)}
+  end
+
   defp do_encode(data) do
     raise EncodeError, message: "Unable to encode given value: #{inspect(data)}"
   end
 
-  defp add_crs(map, nil) do
-    map
-  end
+  defp add_crs(map, nil), do: map
 
   defp add_crs(map, srid) do
     Map.put(map, "crs", %{"type" => "name", "properties" => %{"name" => "EPSG:#{srid}"}})
   end
 
-  def add_properties(map, props) do
+  defp add_id(map, nil), do: map
+
+  defp add_id(map, id), do: Map.put(map, "id", id)
+
+  defp add_properties(map, props) do
     if Enum.empty?(props) do
       map
     else

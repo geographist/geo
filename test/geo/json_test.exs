@@ -282,10 +282,10 @@ defmodule Geo.JSON.Test do
 
     geom = Poison.decode!(json) |> Geo.JSON.decode!()
 
-    assert(Enum.count(geom.geometries) == 2)
+    assert(Enum.count(geom.features) == 2)
 
-    [geom1, _geom2] = geom.geometries
-    assert geom1.coordinates == {2.29009, 49.897446}
+    [geom1, _geom2] = geom.features
+    assert geom1.geometry.coordinates == {2.29009, 49.897446}
     assert geom1.properties["label"] == "8 Boulevard du Port 80000 Amiens"
   end
 

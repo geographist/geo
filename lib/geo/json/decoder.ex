@@ -10,7 +10,9 @@ defmodule Geo.JSON.Decoder do
     MultiLineString,
     MultiPolygon,
     MultiPolygonZ,
-    GeometryCollection
+    GeometryCollection,
+    Feature,
+    FeatureCollection
   }
 
   defmodule DecodeError do
@@ -70,7 +72,7 @@ defmodule Geo.JSON.Decoder do
         )
 
       Map.get(geo_json, "type") == "FeatureCollection" ->
-        geometries =
+        features =
           Enum.map(Map.get(geo_json, "features"), fn x ->
             do_decode(
               Map.get(x, "type"),
@@ -80,9 +82,8 @@ defmodule Geo.JSON.Decoder do
             )
           end)
 
-        %GeometryCollection{
-          geometries: geometries,
-          properties: %{}
+        %FeatureCollection{
+          features: features
         }
 
       true ->
@@ -162,7 +163,15 @@ defmodule Geo.JSON.Decoder do
   end
 
   defp do_decode("Feature", geometry, properties, _id) do
-    do_decode(Map.get(geometry, "type"), Map.get(geometry, "coordinates"), properties, nil)
+    geometry =
+      do_decode(
+        Map.get(geometry, "type"),
+        Map.get(geometry, "coordinates"),
+        properties,
+        nil
+      )
+
+    %Feature{geometry: geometry, properties: properties}
   end
 
   defp do_decode(type, [x, y, _z], properties, crs) do

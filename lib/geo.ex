@@ -84,10 +84,11 @@ defmodule Geo do
           | Geo.MultiPolygon.t()
           | Geo.MultiPolygonZ.t()
           | Geo.GeometryCollection.t()
+          | Geo.FeatureCollection.t()
 
   @typedoc """
   Endianess (byte-order) of the WKB/EWKB representation.
-  
+
     * `:ndr` - little-endian
     * `:xdr` - big-endian
 
