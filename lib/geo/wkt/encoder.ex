@@ -16,7 +16,9 @@ defmodule Geo.WKT.Encoder do
     MultiLineStringZ,
     MultiPolygon,
     MultiPolygonZ,
-    GeometryCollection
+    GeometryCollection,
+    Feature,
+    FeatureCollection
   }
 
   @doc """
@@ -116,6 +118,16 @@ defmodule Geo.WKT.Encoder do
 
   defp do_encode(%GeometryCollection{geometries: geometries}) do
     geom_str = Enum.map(geometries, &do_encode(&1)) |> Enum.join(",")
+
+    "GEOMETRYCOLLECTION(#{geom_str})"
+  end
+
+  defp do_encode(%Feature{geometry: geometry}) do
+    do_encode(geometry)
+  end
+
+  defp do_encode(%FeatureCollection{features: features}) do
+    geom_str = Enum.map(features, &do_encode(&1)) |> Enum.join(",")
 
     "GEOMETRYCOLLECTION(#{geom_str})"
   end
