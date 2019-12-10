@@ -289,6 +289,41 @@ defmodule Geo.JSON.Test do
     assert geom1.properties["label"] == "8 Boulevard du Port 80000 Amiens"
   end
 
+  test "FeatureCollection to add default properties map" do
+    json = """
+      {
+          "attribution": "BAN",
+          "licence": "ODbL 1.0",
+          "query": "8 bd du port",
+          "type": "FeatureCollection",
+          "version": "draft",
+          "features": [
+            {
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  2.29009,
+                  49.897446
+                ]
+              },
+              "type": "Feature"
+            }
+          ]
+        }
+    """
+
+    geom = Poison.decode!(json) |> Geo.JSON.decode!()
+
+    [geom1] = geom.features
+    assert geom1.geometry.coordinates == {2.29009, 49.897446}
+    assert geom1.properties == %{}
+
+    encoded_geom = Geo.JSON.encode!(geom)
+
+    [encoded_geom1] = encoded_geom["features"]
+    assert encoded_geom1["properties"] == %{}
+  end
+
   property "encodes and decodes back to the correct Point struct" do
     check all x <- float(),
               y <- float() do

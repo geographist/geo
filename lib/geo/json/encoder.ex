@@ -52,7 +52,11 @@ defmodule Geo.JSON.Encoder do
         |> do_encode()
         |> add_crs(geom.srid)
         |> add_id(id)
-        |> add_properties(geom.properties)
+
+      %Feature{} ->
+        geom
+        |> do_encode()
+        |> add_crs(geom.srid)
 
       _ ->
         geom
@@ -163,8 +167,20 @@ defmodule Geo.JSON.Encoder do
     %{"type" => "MultiPolygon", "coordinates" => coordinates}
   end
 
+  defp do_encode(%Feature{geometry: geometry, properties: properties}) when is_map(properties) do
+    %{
+      "type" => "Feature",
+      "geometry" => encode!(geometry),
+      "properties" => properties
+    }
+  end
+
   defp do_encode(%Feature{geometry: geometry}) do
-    %{"type" => "Feature", "geometry" => encode!(geometry)}
+    %{
+      "type" => "Feature",
+      "geometry" => encode!(geometry),
+      "properties" => %{}
+    }
   end
 
   defp do_encode(data) do
